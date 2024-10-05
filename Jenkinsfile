@@ -5,11 +5,16 @@ pipeline {
         stage('Build') {
             steps {
                 script {
-                    // Convert Windows paths to Unix paths if running on Windows
+                    // Determine the correct path format based on the environment
                     def workspacePath = isUnix() ? "${env.WORKSPACE}" : "${env.WORKSPACE}".replaceAll("\\\\", "/").replaceAll("C:/", "/c/")
 
-                    // Build Docker image
-                    docker.build("my-flask-app", workspacePath)
+                    // On Windows, use the Windows path format
+                    if (!isUnix()) {
+                        workspacePath = "${env.WORKSPACE}"
+                    }
+
+                    // Build the Docker image with the correct path
+                    bat "docker build -t 'my-flask-app' ${workspacePath}"
                 }
             }
         }
@@ -24,7 +29,7 @@ pipeline {
         stage('Deploy') {
             steps {
                 script {
-                    // Run the Docker container with the fixed path
+                    // Convert the path for the Docker container
                     def workspacePath = isUnix() ? "${env.WORKSPACE}" : "${env.WORKSPACE}".replaceAll("\\\\", "/").replaceAll("C:/", "/c/")
 
                     docker.image('my-flask-app').inside("-v ${workspacePath}:${workspacePath} -w ${workspacePath}") {
