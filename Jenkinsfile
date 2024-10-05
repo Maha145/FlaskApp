@@ -1,42 +1,65 @@
 pipeline {
     agent any
 
+    environment {
+        DOCKER_IMAGE = "my-flask-app"
+    }
+
     stages {
+
+        stage('Checkout') {
+            steps {
+                // Checkout code from the Git repository
+                checkout scm
+            }
+        }
+
         stage('Build') {
             steps {
                 script {
-                    // Determine the correct path format based on the environment
-                    def workspacePath = isUnix() ? "${env.WORKSPACE}" : "${env.WORKSPACE}".replaceAll("\\\\", "/").replaceAll("C:/", "/c/")
-
-                    // On Windows, use the Windows path format
-                    if (!isUnix()) {
-                        workspacePath = "${env.WORKSPACE}"
-                    }
-
-                    // Build the Docker image with the correct path
-                    bat "docker build -t 'my-flask-app' ${workspacePath}"
+                    // Get the current workspace path
+                    def workspacePath = "${env.WORKSPACE}"
+                    // Build Docker image with the correct tag
+                    bat "docker build -t ${DOCKER_IMAGE} ${workspacePath}"
                 }
             }
         }
 
         stage('Test') {
             steps {
-                echo 'Testing application...'
-                // Add your test commands here
+                script {
+                    // Run Docker container and execute tests inside
+                    bat "docker run --rm ${DOCKER_IMAGE} python -m unittest discover -s tests"
+                }
             }
         }
 
         stage('Deploy') {
             steps {
                 script {
-                    // Convert the path for the Docker container
-                    def workspacePath = isUnix() ? "${env.WORKSPACE}" : "${env.WORKSPACE}".replaceAll("\\\\", "/").replaceAll("C:/", "/c/")
-
-                    docker.image('my-flask-app').inside("-v ${workspacePath}:${workspacePath} -w ${workspacePath}") {
-                        sh 'docker inspect my-flask-app'
-                    }
+                    // Example of Docker container deployment
+                    bat "docker run -d -p 5000:5000 ${DOCKER_IMAGE}"
                 }
             }
+        }
+    }
+
+    post {
+        always {
+            // Clean up after the pipeline
+            script {
+                bat "docker rmi ${DOCKER_IMAGE}"
+            }
+        }
+
+        success {
+            // Notify of successful build (optional)
+            echo "Build and deployment successful!"
+        }
+
+        failure {
+            // Handle failures (optional)
+            echo "Build or deployment failed!"
         }
     }
 }
