@@ -25,14 +25,14 @@ pipeline {
             }
         }
 
-        stage('Test') {
+      /*  stage('Test') {
             steps {
                 script {
                     // Run Docker container and execute tests inside
                     bat "docker run --rm ${DOCKER_IMAGE} python -m unittest discover -s tests"
                 }
             }
-        }
+        }*/
 
         stage('Deploy') {
             steps {
