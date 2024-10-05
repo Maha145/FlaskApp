@@ -1,19 +1,12 @@
 pipeline {
-    agent any  // Use any available agent
+    agent any
 
     stages {
         stage('Checkout') {
             steps {
                 echo 'Checking out the code from the repository...'
-               
-            }
-        }
-        
-        stage('Build') {
-            steps {
-                echo 'Building the application...'
-                // Simulate a build process
-                echo 'Build process completed successfully.'
+                // Uncomment the following line to enable Git checkout
+                // git 'https://github.com/Maha145/FlaskApp.git'
             }
         }
 
@@ -27,22 +20,27 @@ pipeline {
 
         stage('Deploy') {
             steps {
-                echo 'Deploying the application...'
-                // Simulate a deployment process
-                echo 'Deployment process completed successfully.'
+                script {
+                    echo 'Deploying the application to Docker...'
+                    
+                    // Build the Docker image
+                    bat 'docker build -t my-flask-app C:\\ProgramData\\Jenkins\\.jenkins\\workspace\\FlaskAppPipeline'
+
+                    // Run the Docker container
+                    bat 'docker run -d --name my-flask-app-container -p 5000:5000 my-flask-app'
+                    
+                    echo 'Application deployed successfully!'
+                }
             }
         }
-    }
-    
-    post {
-        always {
-            echo 'This will always run after the pipeline completes.'
-        }
-        success {
-            echo 'Pipeline completed successfully!'
-        }
-        failure {
-            echo 'Pipeline failed.'
+
+        stage('Cleanup') {
+            steps {
+                echo 'Cleaning up Docker images and containers...'
+                bat 'docker rm -f my-flask-app-container'
+                bat 'docker rmi my-flask-app'
+                echo 'Cleanup completed.'
+            }
         }
     }
 }
