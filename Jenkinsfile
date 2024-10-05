@@ -1,43 +1,48 @@
 pipeline {
-    agent any
+    agent any  // Use any available agent
 
     stages {
         stage('Checkout') {
             steps {
-                script {
-                    // Checkout the code from the Git repository
-                    echo 'Checking out code from Git repository...'
-                    git 'https://github.com/Maha145/FlaskApp.git'
-                }
+                echo 'Checking out the code from the repository...'
+               
+            }
+        }
+        
+        stage('Build') {
+            steps {
+                echo 'Building the application...'
+                // Simulate a build process
+                echo 'Build process completed successfully.'
             }
         }
 
-        stage('Build Docker Image') {
+        stage('Test') {
             steps {
-                script {
-                    echo 'Building Docker image...'
-                    bat 'docker build -t my-flask-app . || (echo "Docker build failed" && exit 1)'
-                }
+                echo 'Running tests...'
+                // Simulate running tests
+                echo 'No tests found. Skipping test stage.'
             }
         }
 
         stage('Deploy') {
             steps {
-                script {
-                    echo 'Deploying Docker container...'
-                    bat 'docker rm -f my-flask-app-container || echo "No running container to remove"'
-                    bat 'docker run -d --name my-flask-app-container -p 5000:5000 my-flask-app || (echo "Failed to run Docker container" && exit 1)'
-                }
+                echo 'Deploying the application...'
+                // Simulate a deployment process
+                echo 'Deployment process completed successfully.'
             }
         }
     }
-
+    
     post {
         always {
-            script {
-                echo 'Cleaning up...'
-                bat 'docker rmi my-flask-app || echo "No image to remove"'
-            }
+            echo 'This will always run after the pipeline completes.'
+        }
+        success {
+            echo 'Pipeline completed successfully!'
+        }
+        failure {
+            echo 'Pipeline failed.'
         }
     }
 }
