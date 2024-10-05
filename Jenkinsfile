@@ -5,7 +5,11 @@ pipeline {
         stage('Build') {
             steps {
                 script {
-                    docker.build('my-flask-app')
+                    // Convert Windows paths to Unix paths if running on Windows
+                    def workspacePath = isUnix() ? "${env.WORKSPACE}" : "${env.WORKSPACE}".replaceAll("\\\\", "/").replaceAll("C:/", "/c/")
+
+                    // Build Docker image
+                    docker.build("my-flask-app", workspacePath)
                 }
             }
         }
@@ -13,15 +17,18 @@ pipeline {
         stage('Test') {
             steps {
                 echo 'Testing application...'
-                // You can add your test scripts here
+                // Add your test commands here
             }
         }
 
         stage('Deploy') {
             steps {
                 script {
-                    docker.image('my-flask-app').inside {
-                        sh 'docker run -d -p 5000:5000 my-flask-app'
+                    // Run the Docker container with the fixed path
+                    def workspacePath = isUnix() ? "${env.WORKSPACE}" : "${env.WORKSPACE}".replaceAll("\\\\", "/").replaceAll("C:/", "/c/")
+
+                    docker.image('my-flask-app').inside("-v ${workspacePath}:${workspacePath} -w ${workspacePath}") {
+                        sh 'docker inspect my-flask-app'
                     }
                 }
             }
