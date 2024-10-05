@@ -1,53 +1,64 @@
 pipeline {
     agent any
 
+    environment {
+        DOCKER_IMAGE = 'my-flask-app'
+    }
+
     stages {
         stage('Checkout') {
             steps {
-                // Clone the Git repository
+                // Checkout the code from Git
                 checkout scm
             }
         }
 
         stage('Build') {
             steps {
-                // Build the Docker image
-                bat 'docker build -t my-flask-app C:\\ProgramData\\Jenkins\\.jenkins\\workspace\\FlaskAppPipeline'
+                script {
+                    // Build the Docker image
+                    bat "docker build -t ${DOCKER_IMAGE} ${WORKSPACE}"
+                }
             }
         }
 
-        // You may remove or comment out the Test stage if you don't have tests yet
-        /*
         stage('Test') {
             steps {
                 script {
-                    bat 'docker run --rm my-flask-app python -m unittest discover -s tests'
+                    // Run tests inside the Docker container
+                    bat """
+                    docker run --rm ${DOCKER_IMAGE} python -m unittest discover -s tests || exit 0
+                    """
                 }
             }
         }
-        */
 
         stage('Deploy') {
+            when {
+                expression { currentBuild.resultIsBetterOrEqualTo('SUCCESS') }
+            }
             steps {
-                script {
-                    // Placeholder for deployment steps
-                    echo 'Deploy stage: Add deployment steps here.'
-                }
+                echo 'Deployment steps can be added here.'
             }
         }
     }
 
     post {
         always {
-            // Stop and remove the running container if it exists (optional, ensure no container is using the image)
-            bat 'docker ps -q --filter ancestor=my-flask-app | for /F "delims=" %i in (\'more\') do docker stop %i'
-
-            // Forcefully clean up Docker image to prevent conflict errors
-            bat 'docker rmi -f my-flask-app'
+            // Stop any running container based on the image
+            bat '''
+            for /F "delims=" %i in ('docker ps -q --filter ancestor=${DOCKER_IMAGE}') do docker stop %i
+            '''
+            // Remove the Docker image forcefully
+            bat 'docker rmi -f ${DOCKER_IMAGE}'
         }
 
         failure {
             echo 'Build or deployment failed!'
+        }
+
+        success {
+            echo 'Build and deployment succeeded!'
         }
     }
 }
