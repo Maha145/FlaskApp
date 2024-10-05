@@ -1,44 +1,37 @@
 pipeline {
     agent any
 
-    environment {
-        DOCKER_IMAGE = "my-flask-app"
-    }
-
     stages {
-
         stage('Checkout') {
             steps {
-                // Checkout code from the Git repository
+                // Clone the Git repository
                 checkout scm
             }
         }
 
         stage('Build') {
             steps {
-                script {
-                    // Get the current workspace path
-                    def workspacePath = "${env.WORKSPACE}"
-                    // Build Docker image with the correct tag
-                    bat "docker build -t ${DOCKER_IMAGE} ${workspacePath}"
-                }
+                // Build the Docker image
+                bat 'docker build -t my-flask-app C:\\ProgramData\\Jenkins\\.jenkins\\workspace\\FlaskAppPipeline'
             }
         }
 
-      /*  stage('Test') {
+        // You may remove or comment out the Test stage if you don't have tests yet
+        /*
+        stage('Test') {
             steps {
                 script {
-                    // Run Docker container and execute tests inside
-                    bat "docker run --rm ${DOCKER_IMAGE} python -m unittest discover -s tests"
+                    bat 'docker run --rm my-flask-app python -m unittest discover -s tests'
                 }
             }
-        }*/
+        }
+        */
 
         stage('Deploy') {
             steps {
                 script {
-                    // Example of Docker container deployment
-                    bat "docker run -d -p 5000:5000 ${DOCKER_IMAGE}"
+                    // Placeholder for deployment steps
+                    echo 'Deploy stage: Add deployment steps here.'
                 }
             }
         }
@@ -46,20 +39,15 @@ pipeline {
 
     post {
         always {
-            // Clean up after the pipeline
-            script {
-                bat "docker rmi ${DOCKER_IMAGE}"
-            }
-        }
+            // Stop and remove the running container if it exists (optional, ensure no container is using the image)
+            bat 'docker ps -q --filter ancestor=my-flask-app | for /F "delims=" %i in (\'more\') do docker stop %i'
 
-        success {
-            // Notify of successful build (optional)
-            echo "Build and deployment successful!"
+            // Forcefully clean up Docker image to prevent conflict errors
+            bat 'docker rmi -f my-flask-app'
         }
 
         failure {
-            // Handle failures (optional)
-            echo "Build or deployment failed!"
+            echo 'Build or deployment failed!'
         }
     }
 }
