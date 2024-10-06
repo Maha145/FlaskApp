@@ -7,63 +7,55 @@ pipeline {
     stages {
         
 
-           stage('Deploy with Ansible') {
+        stage('Remove Old Docker Image') {
             steps {
-                script {
-                    sh 'ansible-playbook ./ansible/deploy_flask_app.yml'
-                }
+                bat '''
+                echo "Checking if the image exists..."
+                docker images -q %DOCKER_IMAGE% || exit 0
+                if exist (docker images -q %DOCKER_IMAGE%) (
+                    echo "Removing old Docker image..."
+                    docker rmi -f %DOCKER_IMAGE%
+                ) else (
+                    echo "No old Docker image found."
+                )
+                '''
             }
         }
 
-        // stage('Remove Old Docker Image') {
-        //     steps {
-        //         bat '''
-        //         echo "Checking if the image exists..."
-        //         docker images -q %DOCKER_IMAGE% || exit 0
-        //         if exist (docker images -q %DOCKER_IMAGE%) (
-        //             echo "Removing old Docker image..."
-        //             docker rmi -f %DOCKER_IMAGE%
-        //         ) else (
-        //             echo "No old Docker image found."
-        //         )
-        //         '''
-        //     }
-        // }
+        stage('Stop and Remove Existing Container') {
+            steps {
+                bat '''
+                echo "Checking if container %CONTAINER_NAME% is running..."
+                docker ps -a -q --filter "name=%CONTAINER_NAME%" || exit 0
+                if exist (docker ps -a -q --filter "name=%CONTAINER_NAME%") (
+                    echo "Stopping and removing the existing container..."
+                    docker stop %CONTAINER_NAME%
+                    docker rm %CONTAINER_NAME%
+                ) else (
+                    echo "No existing container found."
+                )
+                '''
+            }
+        }
 
-        // stage('Stop and Remove Existing Container') {
-        //     steps {
-        //         bat '''
-        //         echo "Checking if container %CONTAINER_NAME% is running..."
-        //         docker ps -a -q --filter "name=%CONTAINER_NAME%" || exit 0
-        //         if exist (docker ps -a -q --filter "name=%CONTAINER_NAME%") (
-        //             echo "Stopping and removing the existing container..."
-        //             docker stop %CONTAINER_NAME%
-        //             docker rm %CONTAINER_NAME%
-        //         ) else (
-        //             echo "No existing container found."
-        //         )
-        //         '''
-        //     }
-        // }
+        stage('Build Docker Image') {
+            steps {
+                bat '''
+                echo "Building new Docker image..."
+                docker build -t %DOCKER_IMAGE% .
+                docker images | findstr %DOCKER_IMAGE%
+                '''
+            }
+        }
 
-        // stage('Build Docker Image') {
-        //     steps {
-        //         bat '''
-        //         echo "Building new Docker image..."
-        //         docker build -t %DOCKER_IMAGE% .
-        //         docker images | findstr %DOCKER_IMAGE%
-        //         '''
-        //     }
-        // }
-
-        // stage('Deploy to Local Docker') {
-        //     steps {
-        //         bat '''
-        //         echo "Deploying the Docker container..."
-        //         docker run -d -p 5000:5000 --name %CONTAINER_NAME% %DOCKER_IMAGE%
-        //         '''
-        //     }
-        // }
+        stage('Deploy to Local Docker') {
+            steps {
+                bat '''
+                echo "Deploying the Docker container..."
+                docker run -d -p 5000:5000 --name %CONTAINER_NAME% %DOCKER_IMAGE%
+                '''
+            }
+        }
     }
 
     post {
