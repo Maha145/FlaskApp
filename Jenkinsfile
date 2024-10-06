@@ -19,18 +19,18 @@ pipeline {
             }
         }
         
-        // stage('Remove Old Docker Image') {
-        //     steps {
-        //         bat '''
-        //         docker images -q %DOCKER_IMAGE% > nul
-        //         if errorlevel 1 (
-        //             echo "No existing image to remove."
-        //         ) else (
-        //             docker rmi %DOCKER_IMAGE%
-        //         )
-        //         '''
-        //     }
-        // }
+        stage('Remove Old Docker Image') {
+            steps {
+                bat '''
+                docker images -q %DOCKER_IMAGE% > nul
+                if errorlevel 1 (
+                    echo "No existing image to remove."
+                ) else (
+                    docker rmi %DOCKER_IMAGE%
+                )
+                '''
+            }
+        }
         
         stage('Deploy to Local Docker') {
             steps {
