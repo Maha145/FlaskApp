@@ -18,6 +18,15 @@ pipeline {
             }
         }
 
+         stage('Cleanup') {
+            steps {
+                echo 'Cleaning up Docker images and containers...'
+                bat 'docker rm -f my-flask-app-container || true' // Ignore errors if container doesn't exist
+                bat 'docker rmi my-flask-app || true' // Ignore errors if image doesn't exist
+                echo 'Cleanup completed.'
+            }
+        }
+
         stage('Deploy') {
             steps {
                 script {
@@ -31,15 +40,6 @@ pipeline {
                     
                     echo 'Application deployed successfully!'
                 }
-            }
-        }
-
-        stage('Cleanup') {
-            steps {
-                echo 'Cleaning up Docker images and containers...'
-                bat 'docker rm -f my-flask-app-container'
-                bat 'docker rmi my-flask-app'
-                echo 'Cleanup completed.'
             }
         }
     }
