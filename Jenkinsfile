@@ -10,7 +10,7 @@ pipeline {
            stage('Deploy with Ansible') {
             steps {
                 script {
-                    sh 'ansible-playbook ansible/deploy_flask_app.yml'
+                    sh 'ansible-playbook ./ansible/deploy_flask_app.yml'
                 }
             }
         }
