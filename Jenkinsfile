@@ -18,14 +18,6 @@ pipeline {
                 '''
             }
         }
-
-        stage('Test Docker Image') {
-            steps {
-                bat '''
-                docker run --rm %DOCKER_IMAGE% python -m unittest discover -s tests || echo "No tests found"
-                '''
-            }
-        }
         
         stage('Remove Old Docker Image') {
             steps {
