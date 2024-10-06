@@ -11,13 +11,7 @@ pipeline {
             }
         }
         
-        stage('Build Docker Image') {
-            steps {
-                bat '''
-                docker build -t %DOCKER_IMAGE% .
-                '''
-            }
-        }
+        
         
         stage('Remove Old Docker Image') {
             steps {
@@ -32,6 +26,14 @@ pipeline {
             }
         }
         
+        stage('Build Docker Image') {
+            steps {
+                bat '''
+                docker build -t %DOCKER_IMAGE% .
+                '''
+            }
+        }
+
         stage('Deploy to Local Docker') {
             steps {
                 bat '''
