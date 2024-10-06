@@ -60,19 +60,15 @@ pipeline {
 
    post {
         success {
-            emailext (
-                subject: "SUCCESS: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
-                body: "The build was successful!\nJob: ${env.JOB_NAME}\nBuild Number: ${env.BUILD_NUMBER}\nURL: ${env.BUILD_URL}",
-                recipientProviders: [[$class: 'DevelopersRecipientProvider']]
-            )
+            mail to: "${params.EMAIL_RECIPIENT}",
+                 subject: "Build Success: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                 body: "Good news! The build was successful."
         }
-
+        
         failure {
-            emailext (
-                subject: "FAILURE: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
-                body: "The build failed!\nJob: ${env.JOB_NAME}\nBuild Number: ${env.BUILD_NUMBER}\nURL: ${env.BUILD_URL}",
-                recipientProviders: [[$class: 'DevelopersRecipientProvider']]
-            )
+            mail to: "${params.EMAIL_RECIPIENT}",
+                 subject: "Build Failed: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                 body: "Oh no! The build failed. Please check the Jenkins console output."
         }
     }
 }
