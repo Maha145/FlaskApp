@@ -58,19 +58,21 @@ pipeline {
         }
     }
 
-    post {
-        always {
-            echo 'Pipeline completed.'
-            bat '''
-            echo "Listing all running containers..."
-            docker ps -a | findstr "%CONTAINER_NAME%"
-            '''
-        }
-        failure {
-            echo 'Build or deployment failed!'
-        }
+   post {
         success {
-            echo 'Build and deployment successful!'
+            emailext (
+                subject: "SUCCESS: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
+                body: "The build was successful!\nJob: ${env.JOB_NAME}\nBuild Number: ${env.BUILD_NUMBER}\nURL: ${env.BUILD_URL}",
+                recipientProviders: [[$class: 'DevelopersRecipientProvider']]
+            )
+        }
+
+        failure {
+            emailext (
+                subject: "FAILURE: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
+                body: "The build failed!\nJob: ${env.JOB_NAME}\nBuild Number: ${env.BUILD_NUMBER}\nURL: ${env.BUILD_URL}",
+                recipientProviders: [[$class: 'DevelopersRecipientProvider']]
+            )
         }
     }
 }
