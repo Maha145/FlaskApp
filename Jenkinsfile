@@ -6,6 +6,7 @@ pipeline {
     stages {
         stage('Checkout Code') {
             steps {
+                echo "Hello check "
               //  git branch: 'main', url: 'https://github.com/Maha145/FlaskApp.git'
             }
         }
