@@ -2,6 +2,7 @@ pipeline {
     agent any
     environment {
         DOCKER_IMAGE = 'my-flask-app'
+        CONTAINER_NAME = 'flask-app'
     }
     stages {
         
@@ -21,6 +22,22 @@ pipeline {
             }
         }
 
+        stage('Stop and Remove Existing Container') {
+            steps {
+                bat '''
+                echo "Checking if container %CONTAINER_NAME% is running..."
+                docker ps -a -q --filter "name=%CONTAINER_NAME%" || exit 0
+                if exist (docker ps -a -q --filter "name=%CONTAINER_NAME%") (
+                    echo "Stopping and removing the existing container..."
+                    docker stop %CONTAINER_NAME%
+                    docker rm %CONTAINER_NAME%
+                ) else (
+                    echo "No existing container found."
+                )
+                '''
+            }
+        }
+
         stage('Build Docker Image') {
             steps {
                 bat '''
@@ -35,7 +52,7 @@ pipeline {
             steps {
                 bat '''
                 echo "Deploying the Docker container..."
-                docker run -d -p 5000:5000 --name flask-app %DOCKER_IMAGE%
+                docker run -d -p 5000:5000 --name %CONTAINER_NAME% %DOCKER_IMAGE%
                 '''
             }
         }
@@ -46,7 +63,7 @@ pipeline {
             echo 'Pipeline completed.'
             bat '''
             echo "Listing all running containers..."
-            docker ps -a | findstr "flask-app"
+            docker ps -a | findstr "%CONTAINER_NAME%"
             '''
         }
         failure {
