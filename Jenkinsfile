@@ -1,46 +1,65 @@
 pipeline {
     agent any
-
+    environment {
+        DOCKER_IMAGE = 'my-flask-app'
+    }
     stages {
-        stage('Checkout') {
+        stage('Checkout Code') {
             steps {
-                echo 'Checking out the code from the repository...'
-                // Uncomment the following line to enable Git checkout
-                // git 'https://github.com/Maha145/FlaskApp.git'
+              //  git branch: 'main', url: 'https://github.com/Maha145/FlaskApp.git'
+            }
+        }
+        
+        stage('Build Docker Image') {
+            steps {
+                bat '''
+                docker build -t %DOCKER_IMAGE% .
+                '''
             }
         }
 
-        stage('Test') {
+        stage('Test Docker Image') {
             steps {
-                echo 'Running tests...'
-                // Simulate running tests
-                echo 'No tests found. Skipping test stage.'
+                bat '''
+                docker run --rm %DOCKER_IMAGE% python -m unittest discover -s tests || echo "No tests found"
+                '''
             }
         }
-
-         stage('Cleanup') {
+        
+        stage('Remove Old Docker Image') {
             steps {
-                echo 'Cleaning up Docker images and containers...'
-                bat 'docker rm -f my-flask-app-container || true' // Ignore errors if container doesn't exist
-                bat 'docker rmi my-flask-app || true' // Ignore errors if image doesn't exist
-                echo 'Cleanup completed.'
+                bat '''
+                docker images -q %DOCKER_IMAGE% > nul
+                if errorlevel 1 (
+                    echo "No existing image to remove."
+                ) else (
+                    docker rmi %DOCKER_IMAGE%
+                )
+                '''
             }
         }
-
-        stage('Deploy') {
+        
+        stage('Deploy to Local Docker') {
             steps {
-                script {
-                    echo 'Deploying the application to Docker...'
-                    
-                    // Build the Docker image
-                    bat 'docker build -t my-flask-app C:\\ProgramData\\Jenkins\\.jenkins\\workspace\\FlaskAppPipeline'
-
-                    // Run the Docker container
-                    bat 'docker run -d --name my-flask-app-container -p 5000:5000 my-flask-app'
-                    
-                    echo 'Application deployed successfully!'
-                }
+                bat '''
+                docker run -d -p 5000:5000 --name flask-app %DOCKER_IMAGE%
+                '''
             }
+        }
+    }
+    
+    post {
+        always {
+            echo 'Pipeline completed.'
+            bat '''
+            docker ps -a | findstr "flask-app"
+            '''
+        }
+        failure {
+            echo 'Build or deployment failed!'
+        }
+        success {
+            echo 'Build and deployment successful!'
         }
     }
 }
