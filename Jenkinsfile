@@ -3,7 +3,8 @@ pipeline {
     environment {
         DOCKER_IMAGE = 'my-flask-app'
     }
-   
+    stages {
+        
 
         stage('Remove Old Docker Image') {
             steps {
