@@ -60,14 +60,14 @@ pipeline {
 
    post {
         success {
-              echo "Sending email to: ${env.BUILD_USER_EMAIL}"
+              echo "Sending email to: ${env.BUILD_USER_NAME}"
             mail to: "mokafikry2001@gmail.com",
                  subject: "Build Success: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
                  body: "Good news! The build was successful."
         }
 
         failure {
-              echo "Sending email to: ${env.BUILD_USER_EMAIL}"
+              echo "Sending email to: ${env.BUILD_USER_NAME}"
             mail to: "mokafikry2001@gmail.com",
                  subject: "Build Failed: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
                  body: "Oh no! The build failed. Please check the Jenkins console output."
