@@ -1,10 +1,13 @@
 pipeline {
     agent any
-      properties([[$class: 'BuildUserVars']])
-    
+     
     environment {
         DOCKER_IMAGE = 'my-flask-app'
         CONTAINER_NAME = 'flask-app'
+    }
+
+     options {
+        buildUserVars() // This enables the Build User Vars plugin
     }
 
     stages {
