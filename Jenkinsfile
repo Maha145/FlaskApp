@@ -10,29 +10,30 @@ pipeline {
 
     stages {
 
- stage('Print User Info') {
+stage('Print User Info') {
             steps {
                 script {
+                    echo"--------------------------------------------------"
                     // This will only work if the user manually triggers the job in Jenkins
                     def userId = currentBuild.rawBuild.getCause(hudson.model.Cause$UserIdCause)?.getUserId()
                     def userName = currentBuild.rawBuild.getCause(hudson.model.Cause$UserIdCause)?.getUserName()
-                    //def email =  currentBuild.rawBuild.getCause(hudson.model.Cause$UserIdCause)?.getUserEmail()
-                    def userEmail = jenkins.model.Jenkins.instance.getUser(userId).getProperty(jenkins.tasks.MailAddressResolver$UserProperty)?.getAddress()
-
-                        env.BUILD_USER = userName
-                        env.BUILD_USER_EMAIL = userEmail
-
-                        echo "Build triggered by: ${userName} (${userEmail})"
-
-
+                    
                     if (userId && userName) {
-                        echo "Triggered by: ${userName} (ID: ${userId})"
+                        // Fetching the email address of the user
+                        def userEmail = jenkins.model.Jenkins.instance.getUser(userId)?.getProperty(jenkins.tasks.MailAddressResolver.UserProperty)?.getAddress()
+
+                        if (userEmail) {
+                            echo "Triggered by: ${userName} (ID: ${userId}, Email: ${userEmail})"
+                            env.BUILD_USER_EMAIL = userEmail
+                        } else {
+                            echo "No email address found for user: ${userName}"
+                        }
                     } else {
                         echo "No user information available (probably triggered by a non-human action)."
                     }
                 }
             }
- }
+        }
         stage('Remove Old Docker Image') {
             steps {
                 bat '''
