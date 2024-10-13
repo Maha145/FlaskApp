@@ -6,11 +6,6 @@ pipeline {
         CONTAINER_NAME = 'flask-app'
     }
 
-
- options {
-        buildUserVars()
-    }
-
     stages {
 
          stage('Print User Info') {
