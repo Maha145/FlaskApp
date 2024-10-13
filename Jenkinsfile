@@ -1,8 +1,6 @@
 pipeline {
     agent any
     
-    
-
     environment {
         DOCKER_IMAGE = 'my-flask-app'
         CONTAINER_NAME = 'flask-app'
@@ -14,7 +12,7 @@ pipeline {
     }
 
     stages {
-        
+
          stage('Print User Info') {
             steps {
                 script {
@@ -23,6 +21,7 @@ pipeline {
                     echo "User Email: ${env.BUILD_USER_EMAIL}"
                 }
             }
+         }
 
         stage('Remove Old Docker Image') {
             steps {
