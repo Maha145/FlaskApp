@@ -6,9 +6,7 @@ pipeline {
         CONTAINER_NAME = 'flask-app'
     }
 
-     options {
-        buildUserVars() // This enables the Build User Vars plugin
-    }
+     
 
     stages {
 
