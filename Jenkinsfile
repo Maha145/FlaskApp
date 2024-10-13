@@ -64,14 +64,17 @@ pipeline {
    post {
         success {
                echo "User Full Name: ${env.BUILD_USER}" // User's full name
-             echo "User Email: ${env.BUILD_USER_EMAIL}"
+                    echo "User Email: ${env.BUILD_USER_EMAIL}"
             mail to: "mokafikry2001@gmail.com",
                  subject: "Build Success: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
                  body:"The pipeline run for ${env.JOB_NAME} - Build #${env.BUILD_NUMBER} was successful. You can view the details at ${env.BUILD_URL}"
         }
 
         failure {
-              echo "Sending email to: ${env.BUILD_USER_NAME}"
+             
+                    echo "User Full Name: ${env.BUILD_USER}" // User's full name
+                    echo "User Email: ${env.BUILD_USER_EMAIL}"
+
             mail to: "mokafikry2001@gmail.com",
                  subject: "Build Failed: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
                  body: "The pipeline run for ${env.JOB_NAME} - Build #${env.BUILD_NUMBER} has failed. You can view the details at ${env.BUILD_URL}"
