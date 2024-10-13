@@ -19,7 +19,7 @@ pipeline {
                     if (userIdCause) {
                         def userId = userIdCause.getUserId()
                         def userName = userIdCause.getUserName()
-                        def userEmail = userIdCause.getUserUrl() // Try to retrieve the email
+                        def userEmail = userIdCause.getUserEmail() // Try to retrieve the email
 
                         echo "Triggered by: ${userName} (ID: ${userId})"
                         echo "User Email: ${userEmail ?: 'No email available'}" // Print email or a message if not available
