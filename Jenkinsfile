@@ -1,9 +1,7 @@
 pipeline {
     agent any
     
-     options {
-        buildUserVars() // Updated to use options instead of properties
-    }
+    
 
     environment {
         DOCKER_IMAGE = 'my-flask-app'
@@ -63,19 +61,33 @@ pipeline {
         }
     }
 
-   post {
-        success {
-              echo "Sending email to: ${env.BUILD_USER_NAME}"
-            mail to: "mokafikry2001@gmail.com",
-                 subject: "Build Success: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-                 body: "Good news! The build was successful."
-        }
 
-        failure {
-              echo "Sending email to: ${env.BUILD_USER_NAME}"
-            mail to: "mokafikry2001@gmail.com",
-                 subject: "Build Failed: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-                 body: "Oh no! The build failed. Please check the Jenkins console output."
+post {
+        always {
+            script {
+                def emailSubject
+                def emailBody
+                def recipientEmail
+
+                if (currentBuild.result == "SUCCESS") {
+                    emailSubject = "Pipeline Success: ${env.JOB_NAME} - Build #${env.BUILD_NUMBER}"
+                    emailBody = "The pipeline run for ${env.JOB_NAME} - Build #${env.BUILD_NUMBER} was successful. You can view the details at ${env.BUILD_URL}"
+                    recipientEmail = "mokafikry2001@gmail.com"
+                }
+                else {
+                    emailSubject = "Pipeline Failure: ${env.JOB_NAME} - Build #${env.BUILD_NUMBER}"
+                    emailBody = "The pipeline run for ${env.JOB_NAME} - Build #${env.BUILD_NUMBER} has failed. You can view the details at ${env.BUILD_URL}"
+                    recipientEmail = "mokafikry2001@gmail.com"
+                }
+
+                emailext (
+                    subject: emailSubject,
+                    body: emailBody,
+                    to: recipientEmail
+                )
+            }
         }
     }
+
+
 }
