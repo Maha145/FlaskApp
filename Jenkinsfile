@@ -7,8 +7,22 @@ pipeline {
         DOCKER_IMAGE = 'my-flask-app'
         CONTAINER_NAME = 'flask-app'
     }
+
+
+ options {
+        buildUserVars()
+    }
+
     stages {
         
+         stage('Print User Info') {
+            steps {
+                script {
+                    echo "Triggered by User ID: ${env.BUILD_USER_ID}"
+                    echo "User Full Name: ${env.BUILD_USER}"
+                    echo "User Email: ${env.BUILD_USER_EMAIL}"
+                }
+            }
 
         stage('Remove Old Docker Image') {
             steps {
