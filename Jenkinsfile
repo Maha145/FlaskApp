@@ -1,5 +1,6 @@
 pipeline {
     agent any
+      properties([[$class: 'BuildUserVars']])
     
     environment {
         DOCKER_IMAGE = 'my-flask-app'
