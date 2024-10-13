@@ -12,16 +12,21 @@ pipeline {
 
     stages {
 
-         stage('Print User Info') {
+ stage('Print User Info') {
             steps {
                 script {
-                    echo "Triggered by User ID: ${env.BUILD_USER_ID}"
-                    echo "User Full Name: ${env.BUILD_USER}"
-                    echo "User Email: ${env.BUILD_USER_EMAIL}"
+                    // This will only work if the user manually triggers the job in Jenkins
+                    def userId = currentBuild.rawBuild.getCause(hudson.model.Cause$UserIdCause)?.getUserId()
+                    def userName = currentBuild.rawBuild.getCause(hudson.model.Cause$UserIdCause)?.getUserName()
+                    
+                    if (userId && userName) {
+                        echo "Triggered by: ${userName} (ID: ${userId})"
+                    } else {
+                        echo "No user information available (probably triggered by a non-human action)."
+                    }
                 }
             }
-         }
-
+ }
         stage('Remove Old Docker Image') {
             steps {
                 bat '''
