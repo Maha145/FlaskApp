@@ -10,16 +10,19 @@ pipeline {
 
     stages {
 
-  stage('Print User Info') {
+    stage('Print User Info') {
             steps {
                 script {
                     // This will only work if the user manually triggers the job in Jenkins
                     def userIdCause = currentBuild.rawBuild.getCause(hudson.model.Cause$UserIdCause)
-                    
+
                     if (userIdCause) {
                         def userId = userIdCause.getUserId()
                         def userName = userIdCause.getUserName()
-                        def userEmail = userIdCause.getUserEmail() // Try to retrieve the email
+
+                        // Access user details
+                        def user = hudson.model.User.get(userId)
+                        def userEmail = user.getProperty(hudson.model.EmailProperty)?.getAddress() // Try to retrieve the email
 
                         echo "Triggered by: ${userName} (ID: ${userId})"
                         echo "User Email: ${userEmail ?: 'No email available'}" // Print email or a message if not available
