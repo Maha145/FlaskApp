@@ -59,17 +59,18 @@ pipeline {
     }
 
    post {
-              success {
-            mail to: "${env.BUILD_USER_EMAIL}",
-                 subject: "Build Success: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-                 body: "Good news! The build was successful."
-        }
-
-        failure {
-            mail to: "${env.BUILD_USER_EMAIL}",
-                 subject: "Build Failed: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-                 body: "Oh no! The build failed. Please check the Jenkins console output."
-        }
+    success {
+        mail to: "mokafikry2001@gmail.com", // Replace with your email
+             subject: "Build Success: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+             body: "Good news! The build was successful."
     }
+
+    failure {
+        mail to: "mokafikry2001@gmail.com", // Replace with your email
+             subject: "Build Failed: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+             body: "Oh no! The build failed. Please check the Jenkins console output."
+    }
+}
+
 
 }
